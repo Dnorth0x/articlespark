@@ -3,15 +3,23 @@ import { ContentIdeas } from '@/types';
 // Use the provided API key
 const GEMINI_API_KEY = 'AIzaSyAVQXo7oZDqUMTQudDwYHRDqQ9nFEokUyE';
 
-export async function generateContentIdeas(topic: string): Promise<ContentIdeas> {
+export async function generateContentIdeas(topic: string, contentStyle: string = 'Evergreen SEO'): Promise<ContentIdeas> {
   const prompt = `
-    As an expert in content marketing and SEO, generate a set of content ideas for the niche topic: "${topic}".
+    As an expert in content marketing and SEO, generate a set of content ideas for the niche topic: "${topic}". 
+    The desired tone and style of the content is "${contentStyle}". 
+    
+    Tailor your entire output to match this style:
+    - "Evergreen SEO": Focus on timeless, search-optimized content with high search volume keywords
+    - "Viral & Trendy": Include current trends, viral potential, and trending hashtags
+    - "Professional & Corporate": Use authoritative language, industry terms, and business-focused angles
+    - "Casual & Humorous": Make it fun, relatable, and entertaining with a conversational tone
+    
     Your response must be a valid JSON object only, with no other text before or after it.
     The JSON object must have the following structure:
     {
-      "seoKeywords": ["an array of 10-15 valuable, long-tail keywords"],
-      "blogTitles": ["an array of 5-7 compelling, clickable blog post titles"],
-      "socialHooks": ["an array of 3-5 short, punchy social media hooks to promote a website on this topic"]
+      "seoKeywords": ["an array of 10-15 valuable keywords tailored to the ${contentStyle} style"],
+      "blogTitles": ["an array of 5-7 compelling blog post titles that match the ${contentStyle} tone"],
+      "socialHooks": ["an array of 3-5 short, punchy social media hooks that fit the ${contentStyle} style"]
     }
   `;
 

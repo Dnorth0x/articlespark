@@ -19,9 +19,11 @@ import { generateContentIdeas } from '@/services/aiService';
 import { ContentIdeas } from '@/types';
 import { ZeroState } from '@/components/ZeroState';
 import { ResultsDisplay } from '@/components/ResultsDisplay';
+import { ContentStylePicker } from '@/components/ContentStylePicker';
 
 export default function ArticleSparkScreen() {
   const [topic, setTopic] = useState('');
+  const [contentStyle, setContentStyle] = useState('Evergreen SEO');
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<ContentIdeas | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -37,7 +39,7 @@ export default function ArticleSparkScreen() {
     setError(null);
 
     try {
-      const data = await generateContentIdeas(topic);
+      const data = await generateContentIdeas(topic, contentStyle);
       setResults(data);
     } catch (error) {
       console.error(error);
@@ -91,6 +93,12 @@ export default function ArticleSparkScreen() {
               }}
               placeholderTextColor={colors.light.placeholderText}
             />
+            
+            <ContentStylePicker
+              selectedStyle={contentStyle}
+              onStyleChange={setContentStyle}
+            />
+            
             <TouchableOpacity 
               style={[
                 styles.button,
@@ -175,6 +183,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'center',
+    marginTop: 12,
   },
   buttonDisabled: {
     opacity: 0.7,
