@@ -17,30 +17,31 @@ import { ChevronRight, Sparkles } from 'lucide-react-native';
 import colors from '@/constants/colors';
 import { generateContentIdeas } from '@/services/aiService';
 import { ContentIdeas } from '@/types';
+import { ZeroState } from '@/components/ZeroState';
+import { ResultsDisplay } from '@/components/ResultsDisplay';
 
 export default function ArticleSparkScreen() {
   const [topic, setTopic] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<ContentIdeas | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const handleGenerate = async () => {
     if (!topic.trim()) {
-      Alert.alert('Please enter a topic');
+      setError('Please enter a topic to generate ideas');
       return;
     }
 
     setIsLoading(true);
     setResults(null);
+    setError(null);
 
     try {
       const data = await generateContentIdeas(topic);
       setResults(data);
     } catch (error) {
       console.error(error);
-      Alert.alert(
-        'Error',
-        'Failed to generate content ideas. Please try again later.'
-      );
+      setError('Failed to generate content ideas. Please check your connection and try again.');
     } finally {
       setIsLoading(false);
     }
@@ -84,7 +85,10 @@ export default function ArticleSparkScreen() {
               style={styles.input}
               placeholder="Enter your niche topic (e.g., sustainable gardening)"
               value={topic}
-              onChangeText={setTopic}
+              onChangeText={(text) => {
+                setTopic(text);
+                if (error) setError(null); // Clear error when user starts typing
+              }}
               placeholderTextColor={colors.light.placeholderText}
             />
             <TouchableOpacity 
@@ -106,60 +110,20 @@ export default function ArticleSparkScreen() {
             </TouchableOpacity>
           </View>
 
-          {isLoading && (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color={colors.light.primary} />
-              <Text style={styles.loadingText}>Generating brilliant ideas...</Text>
-            </View>
-          )}
+          <ResultsDisplay 
+            isLoading={isLoading}
+            results={results}
+            error={error}
+          />
 
-          {results && !isLoading && (
-            <View style={styles.resultsContainer}>
-              <ResultsSection 
-                title="SEO Keywords" 
-                items={results.seoKeywords} 
-                icon="🔍"
-              />
-              <ResultsSection 
-                title="Blog Post Titles" 
-                items={results.blogTitles} 
-                icon="✍️"
-              />
-              <ResultsSection 
-                title="Social Media Hooks" 
-                items={results.socialHooks} 
-                icon="📱"
-              />
-            </View>
+          {!isLoading && !results && !error && (
+            <ZeroState />
           )}
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
-
-interface ResultsSectionProps {
-  title: string;
-  items: string[];
-  icon: string;
-}
-
-const ResultsSection = ({ title, items, icon }: ResultsSectionProps) => (
-  <View style={styles.section}>
-    <View style={styles.sectionHeader}>
-      <Text style={styles.sectionIcon}>{icon}</Text>
-      <Text style={styles.sectionTitle}>{title}</Text>
-    </View>
-    <View style={styles.sectionContent}>
-      {items.map((item, index) => (
-        <View key={index} style={styles.itemContainer}>
-          <Text style={styles.itemBullet}>•</Text>
-          <Text style={styles.itemText}>{item}</Text>
-        </View>
-      ))}
-    </View>
-  </View>
-);
 
 const styles = StyleSheet.create({
   container: {
@@ -220,62 +184,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     marginRight: 8,
-  },
-  loadingContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  loadingText: {
-    marginTop: 12,
-    fontSize: 16,
-    color: colors.light.secondaryText,
-  },
-  resultsContainer: {
-    marginTop: 8,
-  },
-  section: {
-    marginBottom: 24,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  sectionIcon: {
-    fontSize: 20,
-    marginRight: 8,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: colors.light.text,
-  },
-  sectionContent: {
-    marginLeft: 4,
-  },
-  itemContainer: {
-    flexDirection: 'row',
-    marginBottom: 8,
-  },
-  itemBullet: {
-    fontSize: 16,
-    color: colors.light.primary,
-    marginRight: 8,
-    marginTop: 2,
-  },
-  itemText: {
-    fontSize: 15,
-    color: colors.light.text,
-    flex: 1,
-    lineHeight: 22,
   },
 });
