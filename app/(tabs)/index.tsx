@@ -11,10 +11,10 @@ import {
   Platform,
   Alert
 } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack } from 'expo-router';
-import { ChevronRight, Sparkles } from 'lucide-react-native';
+import { ChevronRight, Sparkles, ChevronDown } from 'lucide-react-native';
+import { Button, Menu } from 'react-native-paper';
 import colors from '@/constants/colors';
 import { generateContentIdeas } from '@/services/aiService';
 import { ContentIdeas } from '@/types';
@@ -31,9 +31,18 @@ const STYLE_OPTIONS = [
 export default function ArticleSparkScreen() {
   const [topic, setTopic] = useState('');
   const [contentStyle, setContentStyle] = useState('Viral & Trendy');
+  const [menuVisible, setMenuVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<ContentIdeas | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const openMenu = () => setMenuVisible(true);
+  const closeMenu = () => setMenuVisible(false);
+
+  const handleStyleSelect = (style: string) => {
+    setContentStyle(style);
+    closeMenu();
+  };
 
   const handleGenerate = async () => {
     if (!topic.trim()) {
@@ -103,20 +112,34 @@ export default function ArticleSparkScreen() {
               placeholderTextColor={colors.light.placeholderText}
             />
             
-            <View style={styles.pickerContainer}>
-              <Text style={styles.pickerLabel}>Content Style</Text>
-              <View style={styles.pickerWrapper}>
-                <Picker
-                  selectedValue={contentStyle}
-                  onValueChange={(itemValue) => setContentStyle(itemValue)}
-                  style={styles.picker}
-                  itemStyle={styles.pickerItem}
-                >
-                  {STYLE_OPTIONS.map((option) => (
-                    <Picker.Item key={option} label={option} value={option} />
-                  ))}
-                </Picker>
-              </View>
+            <View style={styles.menuContainer}>
+              <Text style={styles.menuLabel}>Content Style</Text>
+              <Menu
+                visible={menuVisible}
+                onDismiss={closeMenu}
+                anchor={
+                  <Button
+                    mode="outlined"
+                    onPress={openMenu}
+                    style={styles.menuButton}
+                    contentStyle={styles.menuButtonContent}
+                    labelStyle={styles.menuButtonLabel}
+                    icon={() => <ChevronDown size={20} color={colors.light.text} />}
+                  >
+                    {contentStyle}
+                  </Button>
+                }
+                contentStyle={styles.menuContent}
+              >
+                {STYLE_OPTIONS.map((option) => (
+                  <Menu.Item
+                    key={option}
+                    onPress={() => handleStyleSelect(option)}
+                    title={option}
+                    titleStyle={styles.menuItemTitle}
+                  />
+                ))}
+              </Menu>
             </View>
             
             <TouchableOpacity 
@@ -196,29 +219,39 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.light.border,
   },
-  pickerContainer: {
+  menuContainer: {
     marginBottom: 12,
   },
-  pickerLabel: {
+  menuLabel: {
     fontSize: 16,
     fontWeight: '600',
     color: colors.light.text,
     marginBottom: 8,
   },
-  pickerWrapper: {
+  menuButton: {
+    backgroundColor: colors.light.inputBackground,
+    borderColor: colors.light.border,
+    borderRadius: 8,
+  },
+  menuButtonContent: {
+    flexDirection: 'row-reverse',
+    justifyContent: 'space-between',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  menuButtonLabel: {
+    color: colors.light.text,
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  menuContent: {
     backgroundColor: colors.light.inputBackground,
     borderRadius: 8,
-    borderWidth: 1,
-    borderColor: colors.light.border,
-    overflow: 'hidden',
+    marginTop: 8,
   },
-  picker: {
-    height: Platform.OS === 'ios' ? 200 : 50,
+  menuItemTitle: {
     color: colors.light.text,
-  },
-  pickerItem: {
     fontSize: 16,
-    color: colors.light.text,
   },
   button: {
     backgroundColor: colors.light.primary,
