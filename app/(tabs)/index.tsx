@@ -11,6 +11,7 @@ import {
   Platform,
   Alert
 } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack } from 'expo-router';
 import { ChevronRight, Sparkles } from 'lucide-react-native';
@@ -19,11 +20,17 @@ import { generateContentIdeas } from '@/services/aiService';
 import { ContentIdeas } from '@/types';
 import { ZeroState } from '@/components/ZeroState';
 import { ResultsDisplay } from '@/components/ResultsDisplay';
-import { ContentStylePicker } from '@/components/ContentStylePicker';
+
+const STYLE_OPTIONS = [
+  'Viral & Trendy',
+  'Professional & Corporate',
+  'SEO-Optimized & Informative',
+  'Casual & Conversational'
+];
 
 export default function ArticleSparkScreen() {
   const [topic, setTopic] = useState('');
-  const [contentStyle, setContentStyle] = useState('Evergreen SEO');
+  const [contentStyle, setContentStyle] = useState('Viral & Trendy');
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<ContentIdeas | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -33,6 +40,8 @@ export default function ArticleSparkScreen() {
       setError('Please enter a topic to generate ideas');
       return;
     }
+
+    console.log('Selected Style:', contentStyle);
 
     setIsLoading(true);
     setResults(null);
@@ -94,10 +103,21 @@ export default function ArticleSparkScreen() {
               placeholderTextColor={colors.light.placeholderText}
             />
             
-            <ContentStylePicker
-              selectedStyle={contentStyle}
-              onStyleChange={setContentStyle}
-            />
+            <View style={styles.pickerContainer}>
+              <Text style={styles.pickerLabel}>Content Style</Text>
+              <View style={styles.pickerWrapper}>
+                <Picker
+                  selectedValue={contentStyle}
+                  onValueChange={(itemValue) => setContentStyle(itemValue)}
+                  style={styles.picker}
+                  itemStyle={styles.pickerItem}
+                >
+                  {STYLE_OPTIONS.map((option) => (
+                    <Picker.Item key={option} label={option} value={option} />
+                  ))}
+                </Picker>
+              </View>
+            </View>
             
             <TouchableOpacity 
               style={[
@@ -175,6 +195,30 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     borderWidth: 1,
     borderColor: colors.light.border,
+  },
+  pickerContainer: {
+    marginBottom: 12,
+  },
+  pickerLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.light.text,
+    marginBottom: 8,
+  },
+  pickerWrapper: {
+    backgroundColor: colors.light.inputBackground,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.light.border,
+    overflow: 'hidden',
+  },
+  picker: {
+    height: Platform.OS === 'ios' ? 200 : 50,
+    color: colors.light.text,
+  },
+  pickerItem: {
+    fontSize: 16,
+    color: colors.light.text,
   },
   button: {
     backgroundColor: colors.light.primary,
