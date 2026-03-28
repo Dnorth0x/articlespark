@@ -1,2 +1,0 @@
-# articlespark
-Created by Rork
